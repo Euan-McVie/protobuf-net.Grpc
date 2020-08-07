@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Shared_CS;
 
 namespace Services_CS
 {
-    //[Authorize]
+    [Authorize]
     public class MyCalculator : ICalculator
     {
         private int counter = 0;

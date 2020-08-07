@@ -41,8 +41,8 @@ namespace Server_CS
 
             app.UseEndpoints(endpoints =>
             {
-                //endpoints.MapGrpcService<ICalculator>();
-                endpoints.MapGrpcService<MyCalculator>();
+                endpoints.MapGrpcService<ICalculator>();
+                //endpoints.MapGrpcService<MyCalculator>();
                 endpoints.MapGrpcService<MyTimeService>();
             });
         }

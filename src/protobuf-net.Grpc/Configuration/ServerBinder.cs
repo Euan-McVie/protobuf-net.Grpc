@@ -1,9 +1,9 @@
-﻿using Grpc.Core;
-using ProtoBuf.Grpc.Internal;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using Grpc.Core;
+using ProtoBuf.Grpc.Internal;
 
 namespace ProtoBuf.Grpc.Configuration
 {
@@ -22,14 +22,18 @@ namespace ProtoBuf.Grpc.Configuration
         /// <summary>
         /// Initiate a bind operation, causing all service methods to be crawled for the provided type
         /// </summary>
+        public int Bind<TService>(object state, BinderConfiguration? binderConfiguration = null, IServiceImplementationMapper? serviceImplementationMapper = null, TService? service = null)
+            where TService : class
+            => Bind(state, typeof(TService), binderConfiguration, serviceImplementationMapper, service);
+
         public int Bind<TService>(object state, BinderConfiguration? binderConfiguration = null, TService? service = null)
             where TService : class
-            => Bind(state, typeof(TService), binderConfiguration, service);
+            => Bind(state, typeof(TService), binderConfiguration, null, service);
 
         /// <summary>
         /// Initiate a bind operation, causing all service methods to be crawled for the provided type
         /// </summary>
-        public int Bind(object state, Type serviceType, BinderConfiguration? binderConfiguration = null, object? service = null)
+        public int Bind(object state, Type serviceType, BinderConfiguration? binderConfiguration = null, IServiceImplementationMapper? serviceImplementationMapper = null, object? service = null)
         {
             int totalCount = 0;
             object?[]? argsBuffer = null;
@@ -40,12 +44,16 @@ namespace ProtoBuf.Grpc.Configuration
                 ? new HashSet<Type> { serviceType }
                 : ContractOperation.ExpandInterfaces(serviceType);
 
+            Type serviceImplementationType = (serviceImplementationMapper != null)
+                ? serviceImplementationMapper.Map(serviceType)
+                : serviceType;
+
             foreach (var serviceContract in serviceContracts)
             {
                 if (!binderConfiguration.Binder.IsServiceContract(serviceContract, out serviceName)) continue;
 
                 int svcOpCount = 0;
-                var bindCtx = new ServiceBindContext(serviceContract, serviceType, state);
+                var bindCtx = new ServiceBindContext(serviceContract, serviceImplementationType, state);
                 foreach (var op in ContractOperation.FindOperations(binderConfiguration, serviceContract, this))
                 {
                     if (ServerInvokerLookup.TryGetValue(op.MethodType, op.Context, op.Result, op.Void, out var invoker)
