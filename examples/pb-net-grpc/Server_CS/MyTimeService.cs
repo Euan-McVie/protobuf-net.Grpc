@@ -1,15 +1,23 @@
-﻿using MegaCorp;
-using ProtoBuf.Grpc;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using MegaCorp;
+using ProtoBuf.Grpc;
+using Shared_CS;
 
 namespace Server_CS
 {
     public class MyTimeService : ITimeService
     {
+        private readonly ICalculator calculator;
+
+        public MyTimeService(ICalculator calculator)
+        {
+            this.calculator = calculator;
+        }
+
         public IAsyncEnumerable<TimeResult> SubscribeAsync(CallContext context = default)
             => SubscribeAsyncImpl(context.CancellationToken);
 
@@ -19,7 +27,9 @@ namespace Server_CS
             {
                 try
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(10), cancel);
+                    var delaytime = await calculator.IncrementAsync(new IncrementRequest { Inc = 2 });
+                    Console.WriteLine($"Current time increment: {delaytime.Result}");
+                    await Task.Delay(TimeSpan.FromSeconds(delaytime.Result), cancel);
                 }
                 catch (OperationCanceledException)
                 {

@@ -7,6 +7,7 @@ namespace Shared_CS
     public interface ICalculator
     {
         ValueTask<MultiplyResult> MultiplyAsync(MultiplyRequest request);
+        ValueTask<IncrementResult> IncrementAsync(IncrementRequest request);
     }
 
     [DataContract]
@@ -21,6 +22,20 @@ namespace Shared_CS
 
     [DataContract]
     public class MultiplyResult
+    {
+        [DataMember(Order = 1)]
+        public int Result { get; set; }
+    }
+
+    [DataContract]
+    public class IncrementRequest
+    {
+        [DataMember(Order = 1)]
+        public int Inc { get; set; }
+    }
+
+    [DataContract]
+    public class IncrementResult
     {
         [DataMember(Order = 1)]
         public int Result { get; set; }

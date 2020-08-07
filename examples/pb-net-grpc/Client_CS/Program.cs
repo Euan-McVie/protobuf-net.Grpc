@@ -1,12 +1,12 @@
-﻿using Grpc.Core;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Grpc.Core;
 using Grpc.Net.Client;
 using MegaCorp;
 using ProtoBuf.Grpc;
 using ProtoBuf.Grpc.Client;
 using Shared_CS;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Client_CS
 {
@@ -29,10 +29,14 @@ namespace Client_CS
                 await foreach (var time in clock.SubscribeAsync(new CallContext(options)))
                 {
                     Console.WriteLine($"The time is now: {time.Time}");
+                    var currentInc = await calculator.IncrementAsync(new IncrementRequest());
+                    Console.WriteLine($"Current time increment: {currentInc.Result}");
                 }
             }
-            catch (RpcException) { }
+            catch (RpcException e) { Console.WriteLine(e.Message); }
             catch (OperationCanceledException) { }
+            Console.WriteLine("Press [Enter] to exit");
+            Console.ReadLine();
         }
     }
 }
